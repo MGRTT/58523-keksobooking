@@ -18,7 +18,7 @@ var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditio
 
 //  Случайное число в диапазоне от min до max
 var getRandomNumber = function (min, max) {
-  return Math.random() * (max - min) + min;
+  return Math.round(Math.random() * (max - min) + min);
 };
 
 //  Случайный элемент массива
@@ -78,7 +78,7 @@ var createAd = function (x) {
       x: getRandomNumber(300, 900),
       y: getRandomNumber(100, 500)
     }
-  }
+  };
 };
 
 //  Массив объектов (8 штук)
@@ -102,6 +102,8 @@ var removeClass = function (block, className) {
   block.classList.remove(className);
 };
 
+console.log(arrayOfAds);
+
 removeClass(mapPines, 'map--faded');
 
 var template = document.querySelector('template').content; // Нашли template
@@ -109,7 +111,6 @@ var pinTemplate = template.querySelector('.map__pin'); // Нашли шабло�
 var pinContainer = document.querySelector('.map__pins'); // Нашли блок, куда вставлять пины
 
 //  Отрисуйте сгенерированные DOM-элементы в блок .map__pins. Для вставки элементов используйте DocumentFragment
-
 
 
 
