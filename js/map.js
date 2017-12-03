@@ -117,6 +117,7 @@ var clonePins = function (ad) {
 
   pin.style.left = ad.location.x + 'px';
   pin.style.top = ad.location.y + 'px';
+  pin.firstChild.src = ad.author.avatar;
 
   return pin;
 };
@@ -126,7 +127,6 @@ var renderPins = function () {
 
   for (var i = 0; i < arrayOfAds.length; i++) {
     pinFragment.appendChild(clonePins(arrayOfAds[i]));
-    console.log(clonePins(arrayOfAds[i]));
   }
 
   pinContainer.appendChild(pinFragment);
@@ -134,7 +134,25 @@ var renderPins = function () {
 
 renderPins();
 
+var offerTemplate = template.querySelector('.map__card'); //  нашли шаблон объявления
 
-//  На основе первого по порядку элемента из сгенерированного массива и шаблона template article.map__card
-//  создайте DOM-элемент объявления, заполните его данными из объекта и вставьте полученный DOM-элемент в блок .map
+var cloneOffer = function (ad) {
+  var offer = offerTemplate.cloneNode(true);
+
+  var offerTitle = offer.querySelector('h3');
+  var offerAddress = offer.querySelector('small');
+  var offerPrice = offer.querySelector('.popup__price');
+  var offerType = offer.querySelector('h4');
+  var offerFeatures = offer.querySelector('.popup__features');
+  var offerRoomsAndGuests = offer.querySelector('p');
+  var offerChecks = offer.querySelectorAll('p')[3];
+  var offerDescription = offer.querySelectorAll('p')[4];
+
+  offerTitle.textContent = ad.offer.title;
+  offerAddress.textContent = ad.offer.address;
+  offerPrice.textContent = ad.offer.price;
+
+};
+
+
 
