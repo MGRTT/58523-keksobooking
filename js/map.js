@@ -54,6 +54,8 @@ var createAd = function (x) {
   var price = getRandomNumber(1000, 1000000);
   var rooms = getRandomNumber(1, 5);
   var guests = getRandomNumber(1, 8);
+  var coordX = getRandomNumber(300, 900);
+  var coordY = getRandomNumber(100, 500);
 
   return {
     author: {
@@ -62,7 +64,7 @@ var createAd = function (x) {
 
     offer: {
       title: title,
-      addres: location.x + ', ' + location.y,
+      addres: coordX + ', ' + coordY,
       price: price,
       type: type,
       rooms: rooms,
@@ -75,8 +77,8 @@ var createAd = function (x) {
     },
 
     location: {
-      x: getRandomNumber(300, 900),
-      y: getRandomNumber(100, 500)
+      x: coordX,
+      y: coordY
     }
   };
 };
@@ -88,12 +90,10 @@ var createArrayOfAds = function (count) {
   for (var i = 0; i < count; i++) {
     arrayOfAds.push(createAd(i + 1));
   }
-
   return arrayOfAds;
 };
 
 var arrayOfAds = createArrayOfAds(8);
-
 
 //  Удаляем класс .map--faded
 var mapPines = document.querySelector('.map');
@@ -107,11 +107,32 @@ console.log(arrayOfAds);
 removeClass(mapPines, 'map--faded');
 
 var template = document.querySelector('template').content; // Нашли template
+
 var pinTemplate = template.querySelector('.map__pin'); // Нашли шаблонный пин
 var pinContainer = document.querySelector('.map__pins'); // Нашли блок, куда вставлять пины
 
-//  Отрисуйте сгенерированные DOM-элементы в блок .map__pins. Для вставки элементов используйте DocumentFragment
+//  Отрисовали пины в блок .map__pins
+var clonePins = function (ad) {
+  var pin = pinTemplate.cloneNode(true);
 
+  pin.style.left = ad.location.x + 'px';
+  pin.style.top = ad.location.y + 'px';
+
+  return pin;
+};
+
+var renderPins = function () {
+  var pinFragment = document.createDocumentFragment();
+
+  for (var i = 0; i < arrayOfAds.length; i++) {
+    pinFragment.appendChild(clonePins(arrayOfAds[i]));
+    console.log(clonePins(arrayOfAds[i]));
+  }
+
+  pinContainer.appendChild(pinFragment);
+};
+
+renderPins();
 
 
 //  На основе первого по порядку элемента из сгенерированного массива и шаблона template article.map__card
