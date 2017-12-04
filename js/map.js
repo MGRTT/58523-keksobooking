@@ -1,6 +1,5 @@
 'use strict';
 
-//  Массивы со значениями ключей объекта offer
 var titles = [
   'Большая уютная квартира',
   'Маленькая неуютная квартира',
@@ -12,9 +11,23 @@ var titles = [
   'Неуютное бунгало по колено в воде'];
 
 var types = ['flat', 'house', 'bungalo'];
-var chekins = ['12:00', '13:00', '14:00'];
-var checkouts = ['12:00', '13:00', '14:00'];
+var times = ['12:00', '13:00', '14:00'];
 var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
+
+var templateContent = document.querySelector('template').content;
+var pinTemplate = templateContent.querySelector('.map__pin');
+var offerTemplate = templateContent.querySelector('.map__card');
+var mapPins = document.querySelector('.map__pins');
+var map = document.querySelector('.map');
+var offersNextSibling = map.querySelector('.map__filters-container');
+
+var offerCount = 8;
+
+var removeClass = function (block, className) {
+  block.classList.remove(className);
+};
+
+removeClass(map, 'map--faded');
 
 //  Случайное число в диапазоне от min до max
 var getRandomNumber = function (min, max) {
@@ -26,133 +39,126 @@ var getRandomElement = function (arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-function getUnique(arr, startIndex) {
+//  Массив строк случайной длины
+var getUnique = function (arr, startIndex) {
   var index = getRandomNumber(startIndex, arr.length - 1);
   var tmp = arr[index];
+
   arr[index] = arr[startIndex];
   arr[startIndex] = tmp;
-  return tmp;
-}
 
-//  Массив строк случайной длины из features
-function getRandomArr(target) {
+  return tmp;
+};
+
+var getRandomArr = function (target) {
   var arr = [];
   var length = getRandomNumber(0, target.length - 1);
   for (var i = 0; i < length; i++) {
     arr.push(getUnique(target, i));
   }
   return arr;
-}
-
-//  Создание объекта с объявлнием
-var createAd = function (x) {
-  var title = getRandomElement(titles);
-  var type = getRandomElement(types);
-  var checkin = getRandomElement(chekins);
-  var checkout = getRandomElement(checkouts);
-  var feature = getRandomArr(features);
-  var price = getRandomNumber(1000, 1000000);
-  var rooms = getRandomNumber(1, 5);
-  var guests = getRandomNumber(1, 8);
-  var coordX = getRandomNumber(300, 900);
-  var coordY = getRandomNumber(100, 500);
-
-  return {
-    author: {
-      avatar: 'img/avatars/user0' + x + '.png'
-    },
-
-    offer: {
-      title: title,
-      addres: coordX + ', ' + coordY,
-      price: price,
-      type: type,
-      rooms: rooms,
-      guests: guests,
-      checkin: checkin,
-      checkout: checkout,
-      features: feature,
-      description: '',
-      photos: []
-    },
-
-    location: {
-      x: coordX,
-      y: coordY
-    }
-  };
 };
 
-//  Массив объектов (8 штук)
-var createArrayOfAds = function (count) {
-  var arrayOfAds = [];
+//  Создание массива объектов
+var getData = function (count) {
+  var data = [];
 
-  for (var i = 0; i < count; i++) {
-    arrayOfAds.push(createAd(i + 1));
+  for (var i = 1; i <= count; i++) {
+    var x = getRandomNumber(300, 900);
+    var y = getRandomNumber(100, 500);
+    var time = getRandomElement(times);
+
+    var item = {};
+
+    item.author = {};
+    item.author.avatar = 'img/avatars/user0' + i + '.png';
+
+    item.offer = {};
+    item.offer.title = getRandomElement(titles);
+    item.offer.address = x + ', ' + y;
+    item.offer.price = getRandomNumber(1000, 1000000);
+    item.offer.type = getRandomElement(types);
+    item.offer.rooms = getRandomNumber(1, 5);
+    item.offer.guests = getRandomNumber(1, 5);
+    item.offer.checkin = time;
+    item.offer.checkout = time;
+    item.offer.features = getRandomArr(features);
+    item.offer.description = '';
+    item.offer.photos = [];
+
+    item.location = {};
+    item.location.x = x;
+    item.location.y = y;
+
+    data.push(item);
   }
-  return arrayOfAds;
+  return data;
 };
 
-var arrayOfAds = createArrayOfAds(8);
 
-//  Удаляем класс .map--faded
-var mapPines = document.querySelector('.map');
+//  Создание и отрисовка пинов
+var createPin = function (data) {
+  var template = pinTemplate.cloneNode(true);
 
-var removeClass = function (block, className) {
-  block.classList.remove(className);
+  template.querySelector('img').src = data.author.avatar;
+  template.style.left = data.location.x - 20 + 'px';
+  template.style.top = data.location.y + 44 + 'px';
+
+  return template;
 };
 
-console.log(arrayOfAds);
+var renderPins = function (data) {
+  var fragment = document.createDocumentFragment();
 
-removeClass(mapPines, 'map--faded');
+  data.forEach(function (item) {
+    fragment.appendChild(createPin(item));
+  });
 
-var template = document.querySelector('template').content; // Нашли template
-
-var pinTemplate = template.querySelector('.map__pin'); // Нашли шаблонный пин
-var pinContainer = document.querySelector('.map__pins'); // Нашли блок, куда вставлять пины
-
-//  Отрисовали пины в блок .map__pins
-var clonePins = function (ad) {
-  var pin = pinTemplate.cloneNode(true);
-
-  pin.style.left = ad.location.x + 'px';
-  pin.style.top = ad.location.y + 'px';
-  pin.firstChild.src = ad.author.avatar;
-
-  return pin;
+  mapPins.appendChild(fragment);
 };
 
-var renderPins = function () {
-  var pinFragment = document.createDocumentFragment();
+var translateType = function (type) {
+  var translation = null;
 
-  for (var i = 0; i < arrayOfAds.length; i++) {
-    pinFragment.appendChild(clonePins(arrayOfAds[i]));
+  switch (type) {
+    case 'flat' :
+      translation = 'Квартира';
+      break;
+    case 'bungalo' :
+      translation = 'Бунгало';
+      break;
+    case 'house' :
+      translation = 'Дом';
   }
-
-  pinContainer.appendChild(pinFragment);
+  return translation;
 };
 
-renderPins();
+//  Создание и отрисовка объявления
+var createOffer = function (data) {
+  var template = offerTemplate.cloneNode(true);
 
-var offerTemplate = template.querySelector('.map__card'); //  нашли шаблон объявления
+  template.querySelector('h3').textContent = data.offer.title;
+  template.querySelector('small').textContent = data.offer.address;
+  template.querySelector('.popup__price').textContent = data.offer.price + ' \u20BD / ночь';
+  template.querySelector('h4').textContent = translateType(data.offer.type);
+  template.querySelectorAll('p')[2].textContent = data.offer.rooms + ' комнат для ' + data.offer.guests + ' гостей';
+  template.querySelectorAll('p')[3].textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+  template.querySelectorAll('p')[4].textContent = data.offer.description;
+  template.querySelector('.popup__avatar').src = data.author.avatar;
 
-var cloneOffer = function (ad) {
-  var offer = offerTemplate.cloneNode(true);
-
-  var offerTitle = offer.querySelector('h3');
-  var offerAddress = offer.querySelector('small');
-  var offerPrice = offer.querySelector('.popup__price');
-  var offerType = offer.querySelector('h4');
-  var offerFeatures = offer.querySelector('.popup__features');
-  var offerRoomsAndGuests = offer.querySelector('p');
-  var offerChecks = offer.querySelectorAll('p')[3];
-  var offerDescription = offer.querySelectorAll('p')[4];
-
-  offerTitle.textContent = ad.offer.title;
-  offerAddress.textContent = ad.offer.address;
-  offerPrice.textContent = ad.offer.price;
-
+  return template;
 };
 
+var renderOffer = function (data) {
+  var fragment = document.createDocumentFragment();
 
+  data.forEach(function (item) {
+    fragment.appendChild(createOffer(item));
+  });
 
+  map.insertBefore(fragment, offersNextSibling);
+};
+
+var data = getData(offerCount);
+renderPins(data);
+renderOffer(data);
