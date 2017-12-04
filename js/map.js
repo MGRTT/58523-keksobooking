@@ -133,12 +133,12 @@ var translateType = function (type) {
   return translation;
 };
 
-var getFeatures = function (features) {
+var getFeatures = function (featuresList) {
   var featuresBox = document.createElement('ul');
 
   featuresBox.className = 'popup__features';
 
-  features.forEach(function (item) {
+  featuresList.forEach(function (item) {
     var li = document.createElement('li');
     li.className = 'feature feature--' + item;
     featuresBox.appendChild(li);
