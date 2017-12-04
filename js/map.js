@@ -14,6 +14,9 @@ var types = ['flat', 'house', 'bungalo'];
 var times = ['12:00', '13:00', '14:00'];
 var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 
+var pinWidth = 40;
+var pinHeight = 40;
+
 var templateContent = document.querySelector('template').content;
 var pinTemplate = templateContent.querySelector('.map__pin');
 var offerTemplate = templateContent.querySelector('.map__card');
@@ -29,17 +32,14 @@ var removeClass = function (block, className) {
 
 removeClass(map, 'map--faded');
 
-//  Случайное число в диапазоне от min до max
 var getRandomNumber = function (min, max) {
   return Math.round(Math.random() * (max - min) + min);
 };
 
-//  Случайный элемент массива
 var getRandomElement = function (arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-//  Массив строк случайной длины
 var getUnique = function (arr, startIndex) {
   var index = getRandomNumber(startIndex, arr.length - 1);
   var tmp = arr[index];
@@ -59,7 +59,6 @@ var getRandomArr = function (target) {
   return arr;
 };
 
-//  Создание массива объектов
 var getData = function (count) {
   var data = [];
 
@@ -95,14 +94,12 @@ var getData = function (count) {
   return data;
 };
 
-
-//  Создание и отрисовка пинов
 var createPin = function (data) {
   var template = pinTemplate.cloneNode(true);
 
   template.querySelector('img').src = data.author.avatar;
-  template.style.left = data.location.x - 20 + 'px';
-  template.style.top = data.location.y + 44 + 'px';
+  template.style.left = data.location.x - pinWidth / 2 + 'px';
+  template.style.top = data.location.y + pinHeight + 'px';
 
   return template;
 };
@@ -129,11 +126,26 @@ var translateType = function (type) {
       break;
     case 'house' :
       translation = 'Дом';
+      break;
+    default :
+      break;
   }
   return translation;
 };
 
-//  Создание и отрисовка объявления
+var getFeatures = function (features) {
+  var featuresBox = document.createElement('ul');
+
+  featuresBox.className = 'popup__features';
+
+  features.forEach(function (item) {
+    var li = document.createElement('li');
+    li.className = 'feature feature--' + item;
+    featuresBox.appendChild(li);
+  });
+  return featuresBox;
+};
+
 var createOffer = function (data) {
   var template = offerTemplate.cloneNode(true);
 
@@ -145,20 +157,15 @@ var createOffer = function (data) {
   template.querySelectorAll('p')[3].textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
   template.querySelectorAll('p')[4].textContent = data.offer.description;
   template.querySelector('.popup__avatar').src = data.author.avatar;
+  template.replaceChild(getFeatures(data.offer.features), template.querySelector('.popup__features'));
 
   return template;
 };
 
 var renderOffer = function (data) {
-  var fragment = document.createDocumentFragment();
-
-  data.forEach(function (item) {
-    fragment.appendChild(createOffer(item));
-  });
-
-  map.insertBefore(fragment, offersNextSibling);
+  map.insertBefore(createOffer(data), offersNextSibling);
 };
 
 var data = getData(offerCount);
 renderPins(data);
-renderOffer(data);
+renderOffer(data[0]);
