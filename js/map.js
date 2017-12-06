@@ -23,14 +23,14 @@ var offerTemplate = templateContent.querySelector('.map__card');
 var mapPins = document.querySelector('.map__pins');
 var map = document.querySelector('.map');
 var offersNextSibling = map.querySelector('.map__filters-container');
+var mainPin = map.querySelector('.map__pin--main');
+var noticeForm = document.querySelector('.notice__form');
+var popupClose = null;
+
+var activePin = null;
+var currentOffer = null;
 
 var offerCount = 8;
-
-var removeClass = function (block, className) {
-  block.classList.remove(className);
-};
-
-removeClass(map, 'map--faded');
 
 var getRandomNumber = function (min, max) {
   return Math.round(Math.random() * (max - min) + min);
@@ -94,12 +94,13 @@ var getData = function (count) {
   return data;
 };
 
-var createPin = function (data) {
+var createPin = function (data, num) {
   var template = pinTemplate.cloneNode(true);
 
   template.querySelector('img').src = data.author.avatar;
   template.style.left = data.location.x - pinWidth / 2 + 'px';
   template.style.top = data.location.y + pinHeight + 'px';
+  template.dataset.num = num;
 
   return template;
 };
@@ -107,8 +108,8 @@ var createPin = function (data) {
 var renderPins = function (data) {
   var fragment = document.createDocumentFragment();
 
-  data.forEach(function (item) {
-    fragment.appendChild(createPin(item));
+  data.forEach(function (item, i) {
+    fragment.appendChild(createPin(item, i));
   });
 
   mapPins.appendChild(fragment);
@@ -159,13 +160,65 @@ var createOffer = function (data) {
   template.querySelector('.popup__avatar').src = data.author.avatar;
   template.replaceChild(getFeatures(data.offer.features), template.querySelector('.popup__features'));
 
+  popupClose = template.querySelector('.popup__close');
+  popupClose.addEventListener('click', closePopup);
+
+  offersNextSibling.insertAdjacentElement('beforeBegin', template);
+
   return template;
 };
 
-var renderOffer = function (data) {
-  map.insertBefore(createOffer(data), offersNextSibling);
+var Offersdata = getData(offerCount);
+
+var formFieldset = document.querySelectorAll('fieldset');
+
+var disableFormInputs = function () {
+  for (var i = 0; i < formFieldset.length; i++) {
+    formFieldset[i].setAttribute('disabled', 'disabled');
+  }
 };
 
-var data = getData(offerCount);
-renderPins(data);
-renderOffer(data[0]);
+var showFormInputs = function () {
+  for (var i = 0; i < formFieldset.length; i++) {
+    formFieldset[i].removeAttribute('disabled');
+  }
+};
+
+disableFormInputs();
+
+var mainPinMouseupHandler = function () {
+  map.classList.remove('map--faded');
+  noticeForm.classList.remove('notice__form--disabled');
+
+  renderPins(Offersdata);
+  showFormInputs();
+};
+
+var showOffer = function (event) {
+  event.preventDefault();
+  var target = event.target.closest('.map__pin:not(.map__pin--main)');
+
+  if (target) {
+    var index = target.dataset.num;
+    target.classList.add('map__pin--active');
+    if (activePin) {
+      activePin.classList.remove('map__pin--active');
+    }
+    if (currentOffer) {
+      currentOffer.remove();
+    }
+
+    currentOffer = createOffer(Offersdata[index]);
+    activePin = target;
+  }
+};
+
+var closePopup = function (event) {
+  event.preventDefault();
+  activePin.classList.remove('map__pin--active');
+  currentOffer.remove();
+  popupClose.removeEventListener('click', closePopup);
+};
+
+mainPin.addEventListener('mouseup', mainPinMouseupHandler);
+map.addEventListener('click', showOffer, true);
