@@ -159,7 +159,7 @@
 
   disableFormInputs();
 
-  var mainPinMouseupHandler = function () {
+  var mainPinFirstMouseupHandler = function () {
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
 
@@ -193,6 +193,71 @@
     popupClose.removeEventListener('click', closePopup);
   };
 
-  mainPin.addEventListener('mouseup', mainPinMouseupHandler);
+  mainPin.addEventListener('mouseup', mainPinFirstMouseupHandler);
   map.addEventListener('click', showOffer, true);
+
+  //  Drag
+  var pinHandle = mainPin.querySelector('img');
+  var addressField = document.querySelector('#address');
+
+  pinHandle.addEventListener('mousedown', function (evt) {
+    evt.preventDefault();
+
+    var startCoords = {
+      x: evt.clientX,
+      y: evt.clientY
+    };
+
+    var mainPinMmouseMoveHandler = function (moveEvt) {
+      moveEvt.preventDefault();
+
+      var shift = {
+        x: startCoords.x - moveEvt.clientX,
+        y: startCoords.y - moveEvt.clientY
+      };
+
+      startCoords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+
+      var limit = {
+        left: Math.round(mainPin.offsetWidth / 2),
+        top: 170 - mainPin.offsetHeight,
+        right: Math.round(mainPin.offsetParent.offsetWidth - mainPin.offsetWidth / 2),
+        bottom: mainPin.offsetParent.offsetHeight - mainPin.offsetHeight
+      };
+
+      var top = mainPin.offsetTop - shift.y;
+      var left = mainPin.offsetLeft - shift.x;
+
+      if (left < limit.left) {
+        left = limit.left;
+      }
+      if (left > limit.right) {
+        left = limit.right;
+      }
+      if (top > limit.bottom) {
+        top = limit.bottom;
+      }
+      if (top < limit.top) {
+        top = limit.top;
+      }
+
+      mainPin.style.top = top + 'px';
+      mainPin.style.left = left + 'px';
+
+      addressField.value = 'x: ' + parseInt(mainPin.style.left, 10) + ' y: ' + parseInt(mainPin.style.top, 10);
+    };
+
+    var mainPinMouseUpHandler = function (upEvt) {
+      upEvt.preventDefault();
+
+      document.removeEventListener('mousemove', mainPinMmouseMoveHandler);
+      document.removeEventListener('mouseup', mainPinMouseUpHandler);
+    };
+
+    document.addEventListener('mousemove', mainPinMmouseMoveHandler);
+    document.addEventListener('mouseup', mainPinMouseUpHandler);
+  });
 })();
