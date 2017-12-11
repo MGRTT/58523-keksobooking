@@ -1,26 +1,16 @@
 'use strict';
 
 (function () {
+
   var noticeForm = document.querySelector('.notice__form');
   var timeIn = noticeForm.querySelector('#timein');
   var timeOut = noticeForm.querySelector('#timeout');
   var roomsNumber = noticeForm.querySelector('#room_number');
   var guestsNumber = noticeForm.querySelector('#capacity');
 
-  var connectFields = function (evt, field1, field2, callback) {
-    callback(field1, field2);
-
-    field1.addEventListener(evt, function () {
-      callback(field1, field2);
-    });
-  };
-
-  var timeSinc = function (param1, param2) {
+  var syncValue = function (param1, param2) {
     param2.selectedIndex = param1.selectedIndex;
   };
-
-  connectFields('change', timeIn, timeOut, timeSinc);
-  connectFields('change', timeOut, timeIn, timeSinc);
 
   var getMinPrice = function (field1, field2) {
     var value = null;
@@ -62,10 +52,7 @@
     }
   };
 
-  connectFields('change', noticeForm.type, noticeForm.price, getMinPrice);
-  connectFields('input', noticeForm.price, noticeForm.type, setMinPrice);
-
-  var connectRoomsAndGuests = function (param1, param2) {
+  var syncRoomsAndGuests = function (param1, param2) {
     var optionsMapping = {
       1: [1],
       2: [1, 2],
@@ -93,5 +80,11 @@
     }
   };
 
-  connectFields('change', roomsNumber, guestsNumber, connectRoomsAndGuests);
+  window.syncFields('change', timeIn, timeOut, syncValue);
+  window.syncFields('change', timeOut, timeIn, syncValue);
+
+  window.syncFields('change', noticeForm.type, noticeForm.price, getMinPrice);
+  window.syncFields('input', noticeForm.price, noticeForm.type, setMinPrice);
+
+  window.syncFields('change', roomsNumber, guestsNumber, syncRoomsAndGuests);
 })();

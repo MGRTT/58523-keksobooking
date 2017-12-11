@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+
   var titles = [
     'Большая уютная квартира',
     'Маленькая неуютная квартира',
@@ -23,14 +24,12 @@
   var offerTemplate = templateContent.querySelector('.map__card');
   var mapPins = document.querySelector('.map__pins');
   var map = document.querySelector('.map');
-  var offersNextSibling = map.querySelector('.map__filters-container');
+  var filters = map.querySelector('.map__filters-container');
   var mainPin = map.querySelector('.map__pin--main');
   var noticeForm = document.querySelector('.notice__form');
   var formFieldset = document.querySelectorAll('fieldset');
 
   var popupClose = null;
-  var activePin = null;
-  var currentOffer = null;
 
   var offerCount = 8;
 
@@ -69,6 +68,7 @@
     return data;
   };
 
+  //  Pin
   var createPin = function (data, num) {
     var template = pinTemplate.cloneNode(true);
 
@@ -122,38 +122,41 @@
     return featuresBox;
   };
 
-  var createOffer = function (data) {
-    var template = offerTemplate.cloneNode(true);
+  //  Offer
+  window.map = {
+    createOffer: function (data) {
+      var template = offerTemplate.cloneNode(true);
 
-    template.querySelector('h3').textContent = data.offer.title;
-    template.querySelector('small').textContent = data.offer.address;
-    template.querySelector('.popup__price').textContent = data.offer.price + ' \u20BD / ночь';
-    template.querySelector('h4').textContent = translateType(data.offer.type);
-    template.querySelectorAll('p')[2].textContent = data.offer.rooms + ' комнат для ' + data.offer.guests + ' гостей';
-    template.querySelectorAll('p')[3].textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
-    template.querySelectorAll('p')[4].textContent = data.offer.description;
-    template.querySelector('.popup__avatar').src = data.author.avatar;
-    template.replaceChild(getFeatures(data.offer.features), template.querySelector('.popup__features'));
+      template.querySelector('h3').textContent = data.offer.title;
+      template.querySelector('small').textContent = data.offer.address;
+      template.querySelector('.popup__price').textContent = data.offer.price + ' \u20BD / ночь';
+      template.querySelector('h4').textContent = translateType(data.offer.type);
+      template.querySelectorAll('p')[2].textContent = data.offer.rooms + ' комнат для ' + data.offer.guests + ' гостей';
+      template.querySelectorAll('p')[3].textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+      template.querySelectorAll('p')[4].textContent = data.offer.description;
+      template.querySelector('.popup__avatar').src = data.author.avatar;
+      template.replaceChild(getFeatures(data.offer.features), template.querySelector('.popup__features'));
 
-    popupClose = template.querySelector('.popup__close');
-    popupClose.addEventListener('click', closePopup);
+      popupClose = template.querySelector('.popup__close');
+      popupClose.addEventListener('click', closePopup);
 
-    offersNextSibling.insertAdjacentElement('beforeBegin', template);
+      map.insertBefore(template, filters);
 
-    return template;
+      return template;
+    },
+
+    Offersdata: getData(offerCount)
   };
-
-  var Offersdata = getData(offerCount);
 
   var disableFormInputs = function () {
     for (var i = 0; i < formFieldset.length; i++) {
-      formFieldset[i].setAttribute('disabled', 'disabled');
+      formFieldset[i].disabled = true;
     }
   };
 
   var showFormInputs = function () {
     for (var i = 0; i < formFieldset.length; i++) {
-      formFieldset[i].removeAttribute('disabled');
+      formFieldset[i].disabled = false;
     }
   };
 
@@ -163,44 +166,27 @@
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
 
-    renderPins(Offersdata);
+    renderPins(window.map.Offersdata);
     showFormInputs();
-  };
 
-  var showOffer = function (event) {
-    event.preventDefault();
-    var target = event.target.closest('.map__pin:not(.map__pin--main)');
-
-    if (target) {
-      var index = target.dataset.num;
-      target.classList.add('map__pin--active');
-      if (activePin) {
-        activePin.classList.remove('map__pin--active');
-      }
-      if (currentOffer) {
-        currentOffer.remove();
-      }
-
-      currentOffer = createOffer(Offersdata[index]);
-      activePin = target;
-    }
+    mainPin.removeEventListener('mouseup', mainPinFirstMouseupHandler);
   };
 
   var closePopup = function (event) {
     event.preventDefault();
-    activePin.classList.remove('map__pin--active');
-    currentOffer.remove();
+
+    window.offer.activePin.classList.remove('map__pin--active');
+    window.offer.currentOffer.remove();
+
     popupClose.removeEventListener('click', closePopup);
   };
 
   mainPin.addEventListener('mouseup', mainPinFirstMouseupHandler);
-  map.addEventListener('click', showOffer, true);
 
   //  Drag
-  var pinHandle = mainPin;
   var addressField = document.querySelector('#address');
 
-  pinHandle.addEventListener('mousedown', function (evt) {
+  mainPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
     var startCoords = {
