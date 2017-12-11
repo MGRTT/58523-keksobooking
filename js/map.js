@@ -197,7 +197,7 @@
   map.addEventListener('click', showOffer, true);
 
   //  Drag
-  var pinHandle = mainPin.querySelector('img');
+  var pinHandle = mainPin;
   var addressField = document.querySelector('#address');
 
   pinHandle.addEventListener('mousedown', function (evt) {
