@@ -2,20 +2,6 @@
 
 (function () {
 
-  var titles = [
-    'Большая уютная квартира',
-    'Маленькая неуютная квартира',
-    'Огромный прекрасный дворец',
-    'Маленький ужасный дворец',
-    'Красивый гостевой домик',
-    'Некрасивый негостеприимный домик',
-    'Уютное бунгало далеко от моря',
-    'Неуютное бунгало по колено в воде'];
-
-  var types = ['flat', 'house', 'bungalo'];
-  var times = ['12:00', '13:00', '14:00'];
-  var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
-
   var pinWidth = 40;
   var pinHeight = 40;
 
@@ -30,43 +16,6 @@
   var formFieldset = document.querySelectorAll('fieldset');
 
   var popupClose = null;
-
-  var offerCount = 8;
-
-  var getData = function (count) {
-    var data = [];
-
-    for (var i = 1; i <= count; i++) {
-      var x = window.utils.getRandomNumber(300, 900);
-      var y = window.utils.getRandomNumber(100, 500);
-      var time = window.utils.getRandomElement(times);
-
-      var item = {};
-
-      item.author = {};
-      item.author.avatar = 'img/avatars/user0' + i + '.png';
-
-      item.offer = {};
-      item.offer.title = window.utils.getRandomElement(titles);
-      item.offer.address = x + ', ' + y;
-      item.offer.price = window.utils.getRandomNumber(1000, 1000000);
-      item.offer.type = window.utils.getRandomElement(types);
-      item.offer.rooms = window.utils.getRandomNumber(1, 5);
-      item.offer.guests = window.utils.getRandomNumber(1, 5);
-      item.offer.checkin = time;
-      item.offer.checkout = time;
-      item.offer.features = window.utils.getRandomArr(features);
-      item.offer.description = '';
-      item.offer.photos = [];
-
-      item.location = {};
-      item.location.x = x;
-      item.location.y = y;
-
-      data.push(item);
-    }
-    return data;
-  };
 
   //  Pin
   var createPin = function (data, num) {
@@ -144,8 +93,6 @@
 
       return template;
     },
-
-    Offersdata: getData(offerCount)
   };
 
   var disableFormInputs = function () {
@@ -166,8 +113,8 @@
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
 
-    renderPins(window.map.Offersdata);
     showFormInputs();
+    renderPins(window.data.get());
 
     mainPin.removeEventListener('mouseup', mainPinFirstMouseupHandler);
   };
@@ -182,6 +129,11 @@
   };
 
   mainPin.addEventListener('mouseup', mainPinFirstMouseupHandler);
+
+  document.addEventListener('loadData', function (event) {
+    event.preventDefault();
+    map.addEventListener('click', window.utils.clickHandler(window.offer.show, window.data.get()));
+  });
 
   //  Drag
   var addressField = document.querySelector('#address');
