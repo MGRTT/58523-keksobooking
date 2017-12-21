@@ -9,7 +9,22 @@
     document.dispatchEvent(loadData);
   };
 
-  window.backend.load(onLoad, null);
+  var onError = function () {
+    var errorMessage = document.createElement('div');
+    var map = document.querySelector('.map');
+
+    errorMessage.style.position = 'absolute';
+    errorMessage.style.padding = '20px 60px';
+    errorMessage.style.borderRadius = '5px';
+    errorMessage.style.backgroundColor = 'white';
+    errorMessage.style.color = 'red';
+    errorMessage.style.fontSize = '14px';
+    errorMessage.textContent = 'Ошибка соединения';
+
+    map.appendChild(errorMessage);
+  };
+
+  window.backend.load(onLoad, onError);
 
   window.data = {};
   window.data.get = function () {

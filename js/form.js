@@ -87,4 +87,43 @@
   window.syncFields('input', noticeForm.price, noticeForm.type, setMinPrice);
 
   window.syncFields('change', roomsNumber, guestsNumber, syncRoomsAndGuests);
+
+  var confirmSuccess = function () {
+    var successMessage = document.createElement('div');
+
+    successMessage.style.width = '100%';
+    successMessage.style.margin = '-10px 0 10px';
+    successMessage.style.padding = '10px';
+    successMessage.style.border = '3px solid green';
+    successMessage.style.borderRadius = '5px';
+    successMessage.style.color = 'green';
+    successMessage.style.fontSize = '14px';
+
+    successMessage.textContent = 'Данные успешно отправлены';
+
+    noticeForm.appendChild(successMessage);
+  };
+
+  var showError = function () {
+    var errorMessage = document.createElement('div');
+
+    errorMessage.style.width = '100%';
+    errorMessage.style.margin = '-10px 0 10px';
+    errorMessage.style.padding = '10px';
+    errorMessage.style.border = '3px solid red';
+    errorMessage.style.borderRadius = '5px';
+    errorMessage.style.color = 'red';
+    errorMessage.style.fontSize = '14px';
+
+    errorMessage.textContent = 'Произошла ошибка. Попробуйте ещё раз.';
+
+    noticeForm.appendChild(errorMessage);
+  };
+
+  noticeForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    window.backend.save(confirmSuccess, showError, new FormData(noticeForm));
+    noticeForm.reset();
+  }, true);
 })();
