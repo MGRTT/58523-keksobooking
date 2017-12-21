@@ -7,7 +7,7 @@
     currentOffer: null,
     map: document.querySelector('.map'),
 
-    show: function (event) {
+    show: function (event, data) {
       event.preventDefault();
 
       var target = event.target.closest('.map__pin:not(.map__pin--main)');
@@ -22,11 +22,9 @@
           window.offer.currentOffer.remove();
         }
 
-        window.offer.currentOffer = window.map.createOffer(window.map.Offersdata[index]);
+        window.offer.currentOffer = window.map.createOffer(data[index]);
         window.offer.activePin = target;
       }
     }
   };
-
-  window.offer.map.addEventListener('click', window.offer.show, true);
 })();
