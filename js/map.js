@@ -17,6 +17,9 @@
 
   var popupClose = null;
 
+  var limitedPins = [];
+  var limitOfPins = 5;
+
   //  Pin
   var createPin = function (data, num) {
     var template = pinTemplate.cloneNode(true);
@@ -32,10 +35,12 @@
   var renderPins = function (data) {
     var fragment = document.createDocumentFragment();
 
-    data.forEach(function (item, i) {
-      fragment.appendChild(createPin(item, i));
-    });
+    for (var i = 0; i < limitOfPins; i++) {
+      var pin = createPin(data[i], i);
 
+      fragment.appendChild(pin);
+      limitedPins.push(fragment);
+    }
     mapPins.appendChild(fragment);
   };
 
