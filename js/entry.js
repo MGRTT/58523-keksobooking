@@ -20,7 +20,7 @@
     house: 5000,
     palace: 10000
   };
-  var originalData = null;
+
   var init = function () {
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');

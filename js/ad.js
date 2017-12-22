@@ -90,7 +90,7 @@
     }
   };
 
-  var closeAdDetails = function (event) {
+  var closeAdDetails = function () {
     if (currentShowAd) {
       currentShowAd.details.remove();
       currentShowAd.pin.classList.remove('map__pin--active');
