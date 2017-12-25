@@ -1,11 +1,14 @@
 'use strict';
 
 (function () {
+
   if (!window.app) {
     window.app = {};
   }
-  var MAXPRICE = 50000;
-  var MINPRICE = 10000;
+
+  var MAX_PRICE = 50000;
+  var MIN_PRICE = 10000;
+
   var selectCriteria = {
     type: 'any',
     price: 'any',
@@ -19,20 +22,46 @@
     conditioner: false,
     features: []
   };
+
   var initFilters = function (data, elem, callback) {
-    var filtered = function (field, item) {
+    var filtrate = function (field, item) {
       var result = true;
+
       if (selectCriteria[field] !== 'any') {
         result = selectCriteria[field] === item.offer[field];
       }
       return result;
     };
+
+    var filtratePrice = function (item) {
+      var result = true;
+
+      if (selectCriteria.price !== 'any') {
+        switch (selectCriteria.price) {
+          case 'middle':
+            result = item.offer.price >= MIN_PRICE && item.offer.price <= MAX_PRICE;
+            break;
+          case 'low':
+            result = item.offer.price < MIN_PRICE;
+            break;
+          case 'high':
+            result = item.offer.price > MAX_PRICE;
+            break;
+          default:
+            break;
+        }
+      }
+      return result;
+    };
+
     elem.addEventListener('change', function (event) {
       event.preventDefault();
+
       var newData = [];
       var target = event.target;
       var filteredField = target.nodeName.toLowerCase() === 'input' ? target.value : target.id.slice(target.id.indexOf('-') + 1);
       var filteredValue = target.nodeName.toLowerCase() === 'input' ? target.checked : target.options[target.selectedIndex].value;
+
       selectCriteria[filteredField] = typeof filteredValue === 'boolean' || isNaN(filteredValue) ? filteredValue : parseInt(filteredValue, 10);
       for (var key in selectCriteria) {
         if (selectCriteria.hasOwnProperty(key)) {
@@ -60,33 +89,13 @@
           newData = data.slice();
         }
       });
+
       newData = newData.filter(function (item) {
-        return filtered('type', item);
-      }).filter(function (item) {
-        return filtered('guests', item);
-      }).filter(function (item) {
-        return filtered('rooms', item);
-      }).filter(function (item) {
-        var result = true;
-        if (selectCriteria.price !== 'any') {
-          switch (selectCriteria.price) {
-            case 'middle':
-              result = item.offer.price >= MINPRICE && item.offer.price <= MAXPRICE;
-              break;
-            case 'low':
-              result = item.offer.price < MINPRICE;
-              break;
-            case 'high':
-              result = item.offer.price > MAXPRICE;
-              break;
-            default:
-              break;
-          }
-        }
-        return result;
+        return filtrate('type', item) && filtrate('guests', item) && filtrate('rooms', item) && filtratePrice(item);
       });
       callback(newData);
     });
   };
+
   window.app.initFilters = initFilters;
 })();
