@@ -1,12 +1,15 @@
 'use strict';
+
 (function () {
+
   if (!window.app) {
     window.app = {};
   }
-  var DEBOUNCE_INTERVAL = 3000;
+
+  var DEBOUNCE_INTERVAL = 1000;
   var lastTimeout;
 
-  var debounse = function (cb) {
+  var debounce = function (cb) {
     if (lastTimeout) {
       window.clearTimeout(lastTimeout);
     }
@@ -14,5 +17,5 @@
     lastTimeout = window.setTimeout(cb, DEBOUNCE_INTERVAL);
   };
 
-  window.app.debounse = debounse;
+  window.app.debounce = debounce;
 })();

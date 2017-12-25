@@ -1,12 +1,19 @@
 'use strict';
 
 (function () {
+
   if (!window.app) {
     window.app = {};
   }
+
+  var ERROR_INTERVAL = 5000;
+  var STATUS_OK = 200;
+  var READYSTATE_DONE = 4;
+
   var getRandomNumber = function (min, max) {
     return Math.round(Math.random() * (max - min) + min);
   };
+
   var getUnique = function (arr, startIndex) {
     var index = getRandomNumber(startIndex, arr.length - 1);
     var tmp = arr[index];
@@ -19,6 +26,7 @@
 
   var getRandomArr = function (target, count) {
     var arr = [];
+
     for (var i = 0; i < count; i++) {
       arr.push(getUnique(target, i));
     }
@@ -39,6 +47,7 @@
     var args = Array.from(arguments);
     var callback = args.splice(0, 1)[0];
     var keyCode = args.splice(0, 1)[0];
+
     return function (event) {
       args.unshift(event);
       if (event.keyCode === keyCode) {
@@ -47,8 +56,7 @@
     };
   };
 
-
-  var ajax = function (settings) {
+  var configureAjax = function (settings) {
     var defSettings = {
       method: 'GET',
       url: '',
@@ -76,11 +84,11 @@
     }
 
     xhr.onreadystatechange = options.readyStateChange || function () {
-      if (xhr.readyState === 4 && xhr.status === 200) {
+      if (xhr.readyState === READYSTATE_DONE && xhr.status === STATUS_OK) {
         options.success(xhr.response);
       }
 
-      if (xhr.readyState === 4 && xhr.status !== 200) {
+      if (xhr.readyState === READYSTATE_DONE && xhr.status !== STATUS_OK) {
         if (typeof options.sendError === 'function') {
           options.sendError(xhr.response, options.errorBox);
         }
@@ -98,34 +106,41 @@
 
   var renderErrorText = function (message) {
     var fragment = document.createDocumentFragment();
+
     message.forEach(function (item) {
       var row = document.createElement('p');
+
       row.textContent = 'Поле ' + item.fieldName + ': ' + item.errorMessage;
       fragment.appendChild(row);
     });
     return fragment;
   };
+
   var sendError = function (message, target) {
     var error = document.querySelector('#app-error');
+
     if (!error) {
       error = document.createElement('div');
       error.id = 'app-error';
       error.classList.add('app-error');
       target.appendChild(error);
     }
+
     error.innerHTML = '';
+
     if (Object.prototype.toString.call(message) === '[object Array]') {
       error.appendChild(renderErrorText(message));
     } else {
       error.textContent = message;
     }
+
     error.classList.add('app-error--show');
+
     setTimeout(function () {
       error.classList.remove('app-error--show');
-    }, 5000);
-
-
+    }, ERROR_INTERVAL);
   };
+
   var syncFields = function (evt, field1, field2, callback) {
     callback(field1, field2);
 
@@ -133,6 +148,7 @@
       callback(field1, field2);
     });
   };
+
   var checkEntry = function (target, values) {
     for (var i = 0; i < values.length; i++) {
       if (target.indexOf(values[i]) === -1) {
@@ -141,8 +157,9 @@
     }
     return true;
   };
+
   window.app.utils = {
-    ajax: ajax,
+    configureAjax: configureAjax,
     sendError: sendError,
     getRandomArr: getRandomArr,
     clickHandler: clickHandler,
