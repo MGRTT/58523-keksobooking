@@ -24,11 +24,32 @@
   };
 
   var initFilters = function (data, elem, callback) {
-    var toFilter = function (field, item) {
+    var filtrate = function (field, item) {
       var result = true;
 
       if (selectCriteria[field] !== 'any') {
         result = selectCriteria[field] === item.offer[field];
+      }
+      return result;
+    };
+
+    var filtratePrice = function (item) {
+      var result = true;
+
+      if (selectCriteria.price !== 'any') {
+        switch (selectCriteria.price) {
+          case 'middle':
+            result = item.offer.price >= MIN_PRICE && item.offer.price <= MAX_PRICE;
+            break;
+          case 'low':
+            result = item.offer.price < MIN_PRICE;
+            break;
+          case 'high':
+            result = item.offer.price > MAX_PRICE;
+            break;
+          default:
+            break;
+        }
       }
       return result;
     };
@@ -70,29 +91,7 @@
       });
 
       newData = newData.filter(function (item) {
-        return toFilter('type', item);
-      }).filter(function (item) {
-        return toFilter('guests', item);
-      }).filter(function (item) {
-        return toFilter('rooms', item);
-      }).filter(function (item) {
-        var result = true;
-        if (selectCriteria.price !== 'any') {
-          switch (selectCriteria.price) {
-            case 'middle':
-              result = item.offer.price >= MIN_PRICE && item.offer.price <= MAX_PRICE;
-              break;
-            case 'low':
-              result = item.offer.price < MIN_PRICE;
-              break;
-            case 'high':
-              result = item.offer.price > MAX_PRICE;
-              break;
-            default:
-              break;
-          }
-        }
-        return result;
+        return filtrate('type', item) && filtrate('guests', item) && filtrate('rooms', item) && filtratePrice(item);
       });
       callback(newData);
     });

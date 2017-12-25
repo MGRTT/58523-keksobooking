@@ -6,31 +6,30 @@
     window.app = {};
   }
 
-  var ERROR_INTERVAL = 5000;
   var STATUS_OK = 200;
-  var READYSTATE_DONE = 4;
+  var READY_STATE_DONE = 4;
 
   var getRandomNumber = function (min, max) {
     return Math.round(Math.random() * (max - min) + min);
   };
 
-  var getUnique = function (arr, startIndex) {
-    var index = getRandomNumber(startIndex, arr.length - 1);
-    var tmp = arr[index];
+  var getUnique = function (elements, startIndex) {
+    var index = getRandomNumber(startIndex, elements.length - 1);
+    var tmp = elements[index];
 
-    arr[index] = arr[startIndex];
-    arr[startIndex] = tmp;
+    elements[index] = elements[startIndex];
+    elements[startIndex] = tmp;
 
     return tmp;
   };
 
-  var getRandomArr = function (target, count) {
-    var arr = [];
+  var getRandomArr = function (targetItems, count) {
+    var resultElements = [];
 
     for (var i = 0; i < count; i++) {
-      arr.push(getUnique(target, i));
+      resultElements.push(getUnique(targetItems, i));
     }
-    return arr;
+    return resultElements;
   };
 
   var clickHandler = function () {
@@ -56,7 +55,7 @@
     };
   };
 
-  var configureAjax = function (settings) {
+  var getAjax = function (settings) {
     var defSettings = {
       method: 'GET',
       url: '',
@@ -67,7 +66,8 @@
       errorBox: null,
       type: '',
       readyStateChange: null,
-      headers: {}
+      headers: {},
+      delay: 5000
     };
 
     var options = Object.assign({}, defSettings, settings);
@@ -84,20 +84,20 @@
     }
 
     xhr.onreadystatechange = options.readyStateChange || function () {
-      if (xhr.readyState === READYSTATE_DONE && xhr.status === STATUS_OK) {
+      if (xhr.readyState === READY_STATE_DONE && xhr.status === STATUS_OK) {
         options.success(xhr.response);
       }
 
-      if (xhr.readyState === READYSTATE_DONE && xhr.status !== STATUS_OK) {
+      if (xhr.readyState === READY_STATE_DONE && xhr.status !== STATUS_OK) {
         if (typeof options.sendError === 'function') {
-          options.sendError(xhr.response, options.errorBox);
+          options.sendError(xhr.response, options.errorBox, options.delay);
         }
       }
     };
 
     xhr.onerror = function () {
       if (typeof options.sendError === 'function') {
-        options.sendError('Произошла ошибка соединения!', options.errorBox);
+        options.sendError('Произошла ошибка соединения!', options.errorBox, options.delay);
       }
     };
 
@@ -116,14 +116,14 @@
     return fragment;
   };
 
-  var sendError = function (message, target) {
+  var sendError = function (message, targetItems, delay) {
     var error = document.querySelector('#app-error');
 
     if (!error) {
       error = document.createElement('div');
       error.id = 'app-error';
       error.classList.add('app-error');
-      target.appendChild(error);
+      targetItems.appendChild(error);
     }
 
     error.innerHTML = '';
@@ -138,7 +138,7 @@
 
     setTimeout(function () {
       error.classList.remove('app-error--show');
-    }, ERROR_INTERVAL);
+    }, delay);
   };
 
   var syncFields = function (evt, field1, field2, callback) {
@@ -149,9 +149,9 @@
     });
   };
 
-  var checkEntry = function (target, values) {
+  var checkEntry = function (targetItems, values) {
     for (var i = 0; i < values.length; i++) {
-      if (target.indexOf(values[i]) === -1) {
+      if (targetItems.indexOf(values[i]) === -1) {
         return false;
       }
     }
@@ -159,7 +159,7 @@
   };
 
   window.app.utils = {
-    configureAjax: configureAjax,
+    getAjax: getAjax,
     sendError: sendError,
     getRandomArr: getRandomArr,
     clickHandler: clickHandler,

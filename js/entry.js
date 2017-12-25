@@ -4,16 +4,16 @@
 
   var SUCCESS_INTERVAL = 5000;
 
-  var Key = {
-    ENTER: 13,
-    ESC: 27
-  };
-
   var OPTIONS_MAP = {
     1: [1],
     2: [1, 2],
     3: [1, 2, 3],
     100: [0]
+  };
+
+  var KeyCode = {
+    ENTER: 13,
+    ESC: 27
   };
 
   var LimitPrice = {
@@ -33,7 +33,7 @@
   var mainPin = map.querySelector('.map__pin--main');
   var noticeForm = document.querySelector('.notice__form');
 
-  var mainPinMouseUpHandler = function () {
+  var initHandler = function () {
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
 
@@ -45,7 +45,7 @@
       item.disabled = false;
     });
 
-    mainPin.removeEventListener('mouseup', mainPinMouseUpHandler);
+    mainPin.removeEventListener('mouseup', initHandler);
   };
 
   var doCloseHandler = function (event) {
@@ -67,6 +67,7 @@
     elem: noticeForm,
     sendError: window.app.utils.sendError,
     type: 'json',
+    delay: 5000,
     success: function () {
       var message = document.createElement('p');
 
@@ -80,19 +81,18 @@
     }
   });
 
-  document.addEventListener('loadData', function (event) {
+  var runApplicationHandler = function (event) {
     event.preventDefault();
 
     noticeForm.addEventListener('submit', formHandler);
-    mainPin.addEventListener('mouseup', mainPinMouseUpHandler);
+    mainPin.addEventListener('mouseup', initHandler);
     map.addEventListener('click', window.app.utils.clickHandler(window.app.ad.showAdDetails, map, offerTemplate));
     map.addEventListener('click', window.app.utils.clickHandler(doCloseHandler));
-    document.addEventListener('keydown', window.app.utils.keyDownHandler(window.app.ad.closeAdDetails, Key.ESC));
-    map.addEventListener('keydown', window.app.utils.keyDownHandler(doCloseHandler, Key.ENTER));
+    document.addEventListener('keydown', window.app.utils.keyDownHandler(window.app.ad.closeAdDetails, KeyCode.ESC));
+    map.addEventListener('keydown', window.app.utils.keyDownHandler(doCloseHandler, KeyCode.ENTER));
     mainPin.addEventListener('mousedown', pinMoveHandler);
     window.app.utils.syncFields('change', noticeForm.timein, noticeForm.timeout, syncValue);
     window.app.utils.syncFields('change', noticeForm.timeout, noticeForm.timein, syncValue);
-
     window.app.utils.syncFields('change', noticeForm.type, noticeForm.price, function (field1, field2) {
       field2.value = LimitPrice[field1.value];
     });
@@ -148,5 +148,7 @@
         window.app.ad.renderPins(window.app.data.get(), mapPins, pinTemplate);
       });
     });
-  });
+    document.removeEventListener('loadData', runApplicationHandler);
+  };
+  document.addEventListener('loadData', runApplicationHandler);
 })();

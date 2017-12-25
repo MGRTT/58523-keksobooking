@@ -68,14 +68,15 @@
 
   var createOffer = function (data, offerTemplate) {
     var template = offerTemplate.cloneNode(true);
+    var paragraphElements = template.querySelectorAll('p');
 
     template.querySelector('h3').textContent = data.offer.title;
     template.querySelector('small').textContent = data.offer.address;
     template.querySelector('.popup__price').textContent = data.offer.price + ' \u20BD / ночь';
     template.querySelector('h4').textContent = TYPE_AD[data.offer.type];
-    template.querySelectorAll('p')[2].textContent = data.offer.rooms + ' комнат для ' + data.offer.guests + ' гостей';
-    template.querySelectorAll('p')[3].textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
-    template.querySelectorAll('p')[4].textContent = data.offer.description;
+    paragraphElements[2].textContent = data.offer.rooms + ' комнат для ' + data.offer.guests + ' гостей';
+    paragraphElements[3].textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+    paragraphElements[4].textContent = data.offer.description;
     template.querySelector('.popup__avatar').src = data.author.avatar;
     template.replaceChild(getFeatures(data.offer.features), template.querySelector('.popup__features'));
 

@@ -6,11 +6,12 @@
     window.app = {};
   }
 
-  var offerData = null;
-  var loadData = new Event('loadData', {bubbles: true, cancelable: true});
   var URL = 'https://1510.dump.academy/keksobooking/data';
 
-  window.app.utils.configureAjax({
+  var offerData = null;
+  var loadData = new Event('loadData', {bubbles: true, cancelable: true});
+
+  window.app.utils.getAjax({
     method: 'GET',
     url: URL,
     errorBox: document.body,
