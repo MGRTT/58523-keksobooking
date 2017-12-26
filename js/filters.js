@@ -24,7 +24,7 @@
   };
 
   var initFilters = function (data, elem, callback) {
-    var filtrate = function (field, item) {
+    var filterAds = function (field, item) {
       var result = true;
 
       if (selectCriteria[field] !== 'any') {
@@ -33,7 +33,7 @@
       return result;
     };
 
-    var filtratePrice = function (item) {
+    var filterAdsByPrice = function (item) {
       var result = true;
 
       if (selectCriteria.price !== 'any') {
@@ -91,7 +91,7 @@
       });
 
       newData = newData.filter(function (item) {
-        return filtrate('type', item) && filtrate('guests', item) && filtrate('rooms', item) && filtratePrice(item);
+        return filterAds('type', item) && filterAds('guests', item) && filterAds('rooms', item) && filterAdsByPrice(item);
       });
       callback(newData);
     });
